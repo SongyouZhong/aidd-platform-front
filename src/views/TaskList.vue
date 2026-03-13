@@ -33,6 +33,13 @@
         <InputText v-model="searchQuery" placeholder="搜索任务 ID 或名称..." style="width: 16rem" />
       </div>
       <div class="toolbar-actions">
+        <Button
+          :icon="autoRefresh ? 'pi pi-pause' : 'pi pi-play'"
+          :severity="autoRefresh ? 'secondary' : 'warn'"
+          outlined
+          :label="autoRefresh ? '自动刷新' : '已暂停'"
+          @click="autoRefresh = !autoRefresh"
+        />
         <Button icon="pi pi-refresh" severity="secondary" outlined @click="loadTasks" />
         <Button label="创建任务" icon="pi pi-plus" @click="showCreateDialog = true" />
       </div>
@@ -188,7 +195,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import { useConfirm } from 'primevue/useconfirm'
@@ -218,6 +225,7 @@ const loading = ref(false)
 const searchQuery = ref('')
 const showCreateDialog = ref(false)
 const creating = ref(false)
+const autoRefresh = ref(true)
 
 const filters = reactive({
   status: null as string | null,
@@ -297,7 +305,11 @@ async function loadTasks() {
   }
 }
 
-usePolling(loadTasks, 15000)
+watch(filters, () => loadTasks())
+
+usePolling(async () => {
+  if (autoRefresh.value) await loadTasks()
+}, 15000)
 
 function priorityLabel(p: number): string {
   return TaskPriorityLabel[p] || String(p)

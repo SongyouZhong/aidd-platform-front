@@ -1,7 +1,7 @@
 <template>
   <div class="dashboard">
     <!-- Connection lost banner -->
-    <div v-if="healthPoll.paused.value" class="connection-banner">
+    <div v-if="healthPoll.paused.value || statsPoll.paused.value" class="connection-banner">
       <i class="pi pi-exclamation-triangle"></i>
       连接断开，数据可能不是最新的。
       <Button label="重新连接" size="small" severity="warn" @click="reconnectAll" />

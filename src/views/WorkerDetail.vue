@@ -97,12 +97,28 @@
       <Card class="section-card">
         <template #title>当前运行任务 ({{ worker.current_tasks.length }})</template>
         <template #content>
-          <DataTable v-if="worker.current_tasks.length" :value="currentTaskRows" dataKey="id">
+          <DataTable v-if="worker.current_tasks.length" :value="currentTaskDetails" dataKey="id">
             <Column header="任务 ID">
               <template #body="{ data }">
                 <router-link :to="`/tasks/${data.id}`" class="link mono">
                   {{ data.id.substring(0, 12) }}...
                 </router-link>
+              </template>
+            </Column>
+            <Column header="服务" style="width: 6rem">
+              <template #body="{ data }">
+                {{ data.service || '-' }}
+              </template>
+            </Column>
+            <Column header="状态" style="width: 7rem">
+              <template #body="{ data }">
+                <StatusTag v-if="data.status" :status="data.status" />
+                <span v-else>-</span>
+              </template>
+            </Column>
+            <Column header="开始时间" style="width: 10rem">
+              <template #body="{ data }">
+                {{ data.started_at ? formatTime(data.started_at) : '-' }}
               </template>
             </Column>
           </DataTable>
@@ -119,7 +135,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import { useConfirm } from 'primevue/useconfirm'
@@ -132,7 +148,9 @@ import StatusTag from '@/components/StatusTag.vue'
 import ResourceBar from '@/components/ResourceBar.vue'
 import { usePolling } from '@/composables/usePolling'
 import { getWorker, deleteWorker } from '@/api/workers'
+import { getTask } from '@/api/tasks'
 import type { Worker } from '@/types/worker'
+import type { Task } from '@/types/task'
 import { format, formatDistanceToNow } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
 
@@ -144,6 +162,7 @@ const confirm = useConfirm()
 const worker = ref<Worker | null>(null)
 const loading = ref(true)
 const workerId = route.params.id as string
+const taskDetailsMap = ref<Record<string, Task>>({})
 
 async function loadWorker() {
   try {
@@ -154,10 +173,31 @@ async function loadWorker() {
   }
 }
 
+async function loadCurrentTaskDetails() {
+  if (!worker.value?.current_tasks.length) return
+  const taskIds = worker.value.current_tasks
+  const newIds = taskIds.filter((id) => !taskDetailsMap.value[id])
+  const removedIds = Object.keys(taskDetailsMap.value).filter((id) => !taskIds.includes(id))
+  removedIds.forEach((id) => delete taskDetailsMap.value[id])
+  await Promise.allSettled(
+    newIds.map(async (id) => {
+      try {
+        const { data } = await getTask(id)
+        taskDetailsMap.value[id] = data
+      } catch { /* task may no longer exist */ }
+    })
+  )
+}
+
+watch(() => worker.value?.current_tasks, () => loadCurrentTaskDetails(), { deep: true })
+
 usePolling(loadWorker, 10000)
 
-const currentTaskRows = computed(() =>
-  (worker.value?.current_tasks || []).map((id) => ({ id }))
+const currentTaskDetails = computed(() =>
+  (worker.value?.current_tasks || []).map((id) => {
+    const detail = taskDetailsMap.value[id]
+    return detail || { id, service: '', status: '', started_at: '' }
+  })
 )
 
 function formatTime(iso?: string): string {

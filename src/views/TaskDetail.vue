@@ -115,6 +115,26 @@
         </template>
       </Card>
 
+      <!-- Input files -->
+      <Card v-if="task.input_files && task.input_files.length" class="section-card">
+        <template #title>输入文件</template>
+        <template #content>
+          <ul class="file-list">
+            <li v-for="f in task.input_files" :key="f" class="mono">{{ f }}</li>
+          </ul>
+        </template>
+      </Card>
+
+      <!-- Output files -->
+      <Card v-if="task.output_files && task.output_files.length" class="section-card">
+        <template #title>输出文件</template>
+        <template #content>
+          <ul class="file-list">
+            <li v-for="f in task.output_files" :key="f" class="mono">{{ f }}</li>
+          </ul>
+        </template>
+      </Card>
+
       <!-- Result -->
       <Card v-if="task.result" class="section-card">
         <template #title>执行结果</template>
@@ -308,6 +328,18 @@ function handleCancel() {
   margin: 0;
   white-space: pre-wrap;
   word-break: break-word;
+}
+
+.file-list {
+  margin: 0;
+  padding-left: 1.5rem;
+  list-style: disc;
+}
+
+.file-list li {
+  padding: 0.25rem 0;
+  font-size: 0.85rem;
+  word-break: break-all;
 }
 
 .actions {

@@ -27,6 +27,33 @@
       />
     </div>
 
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="toolbar-filters">
+        <Select
+          v-model="filters.status"
+          :options="statusOptions"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="状态"
+          showClear
+          style="width: 10rem"
+        />
+        <Select
+          v-model="filters.service"
+          :options="serviceFilterOptions"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="支持服务"
+          showClear
+          style="width: 10rem"
+        />
+      </div>
+      <div class="toolbar-actions">
+        <Button icon="pi pi-refresh" severity="secondary" outlined @click="loadData" />
+      </div>
+    </div>
+
     <!-- Worker table -->
     <DataTable
       :value="workers"
@@ -116,7 +143,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, reactive, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import { useConfirm } from 'primevue/useconfirm'
@@ -124,10 +151,12 @@ import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import ProgressBar from 'primevue/progressbar'
 import Button from 'primevue/button'
+import Select from 'primevue/select'
 import StatsCard from '@/components/StatsCard.vue'
 import StatusTag from '@/components/StatusTag.vue'
 import { usePolling } from '@/composables/usePolling'
 import { getWorkers, getWorkerStats, deleteWorker } from '@/api/workers'
+import { WorkerStatus } from '@/types/worker'
 import type { Worker, ClusterStatsResponse } from '@/types/worker'
 import { formatDistanceToNow } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
@@ -140,16 +169,40 @@ const workers = ref<Worker[]>([])
 const clusterStats = ref<ClusterStatsResponse | null>(null)
 const loading = ref(false)
 
+const filters = reactive({
+  status: null as string | null,
+  service: null as string | null,
+})
+
+const statusOptions = [
+  { label: 'Online', value: WorkerStatus.ONLINE },
+  { label: 'Busy', value: WorkerStatus.BUSY },
+  { label: 'Offline', value: WorkerStatus.OFFLINE },
+  { label: 'Draining', value: WorkerStatus.DRAINING },
+]
+
+const serviceFilterOptions = [
+  { label: 'ADMET', value: 'admet' },
+  { label: 'Docking', value: 'docking' },
+  { label: 'MD', value: 'md' },
+  { label: 'QSAR', value: 'qsar' },
+]
+
 async function loadData() {
   loading.value = true
   try {
-    const [workersRes, statsRes] = await Promise.all([getWorkers(), getWorkerStats()])
+    const params: Record<string, any> = {}
+    if (filters.status) params.status = filters.status
+    if (filters.service) params.service = filters.service
+    const [workersRes, statsRes] = await Promise.all([getWorkers(params), getWorkerStats()])
     workers.value = workersRes.data.items
     clusterStats.value = statsRes.data
   } finally {
     loading.value = false
   }
 }
+
+watch(filters, () => loadData())
 
 usePolling(loadData, 15000)
 
@@ -223,6 +276,25 @@ function handleDelete(worker: Worker) {
 .action-buttons {
   display: flex;
   gap: 0.25rem;
+}
+
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.toolbar-filters {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.toolbar-actions {
+  display: flex;
+  gap: 0.5rem;
 }
 
 .text-muted {
