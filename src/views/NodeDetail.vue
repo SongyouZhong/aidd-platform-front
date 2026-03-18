@@ -159,9 +159,9 @@ const starting = ref(false)
 
 const startForm = ref({
   service: 'admet',
-  deploy_mode: 'host',
+  deploy_mode: 'docker',
 })
-const serviceOptions = ['admet', 'docking', 'qsar', 'md']
+const serviceOptions = ['admet', 'docking']
 const deployOptions = ['host', 'docker']
 
 async function fetchDetail() {
