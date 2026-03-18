@@ -41,6 +41,16 @@ const menuItems = [
     icon: 'pi pi-server',
     command: () => router.push('/workers'),
   },
+  {
+    label: 'Nodes',
+    icon: 'pi pi-sitemap',
+    command: () => router.push('/nodes'),
+  },
+  {
+    label: 'Infra Config',
+    icon: 'pi pi-cog',
+    command: () => router.push('/infra-config'),
+  },
 ]
 </script>
 

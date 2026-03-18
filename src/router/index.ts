@@ -33,6 +33,24 @@ const router = createRouter({
       component: () => import('@/views/WorkerDetail.vue'),
       meta: { title: 'Worker 详情' },
     },
+    {
+      path: '/nodes',
+      name: 'nodes',
+      component: () => import('@/views/NodeList.vue'),
+      meta: { title: '计算节点' },
+    },
+    {
+      path: '/nodes/:id',
+      name: 'node-detail',
+      component: () => import('@/views/NodeDetail.vue'),
+      meta: { title: '节点详情' },
+    },
+    {
+      path: '/infra-config',
+      name: 'infra-config',
+      component: () => import('@/views/InfraConfig.vue'),
+      meta: { title: '基础设施配置' },
+    },
   ],
 })
 
