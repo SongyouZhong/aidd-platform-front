@@ -149,8 +149,8 @@ function reconnectAll() {
   statsPoll.reconnect()
 }
 
-const chartData = computed(() => {
-  if (!taskStats.value) return null
+const chartData = computed<object | undefined>(() => {
+  if (!taskStats.value) return undefined
   const s = taskStats.value
   return {
     labels: ['Pending', 'Running', 'Completed', 'Failed', 'Cancelled'],

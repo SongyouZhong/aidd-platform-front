@@ -1,5 +1,5 @@
 # ---- 构建阶段 ----
-FROM node:22-alpine AS build
+FROM harbor.createrna.com/library/node:22-alpine AS build
 WORKDIR /app
 RUN corepack enable
 COPY package.json pnpm-lock.yaml ./
