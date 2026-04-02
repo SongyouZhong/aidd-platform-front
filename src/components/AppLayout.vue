@@ -51,6 +51,11 @@ const menuItems = [
     icon: 'pi pi-cog',
     command: () => router.push('/infra-config'),
   },
+  {
+    label: 'External Services',
+    icon: 'pi pi-bolt',
+    command: () => router.push('/external-services'),
+  },
 ]
 </script>
 

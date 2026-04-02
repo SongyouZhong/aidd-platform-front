@@ -51,6 +51,12 @@ const router = createRouter({
       component: () => import('@/views/InfraConfig.vue'),
       meta: { title: '基础设施配置' },
     },
+    {
+      path: '/external-services',
+      name: 'external-services',
+      component: () => import('@/views/ExternalServices.vue'),
+      meta: { title: '外部服务探针' },
+    },
   ],
 })
 

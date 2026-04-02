@@ -5,12 +5,13 @@
       <div class="flex items-center gap-3">
         <Button icon="pi pi-arrow-left" severity="secondary" text @click="router.push('/nodes')" />
         <h2 class="text-2xl font-bold m-0">{{ node.hostname }}</h2>
+        <Tag v-if="node.node_type === 'external_service'" value="外部服务" severity="warn" />
         <StatusTag :status="node.status" />
       </div>
       <div class="flex gap-2">
         <Button icon="pi pi-refresh" label="刷新" severity="secondary" outlined @click="refresh" />
         <Button
-          v-if="node.status === 'online'"
+          v-if="node.status === 'online' && node.node_type !== 'external_service'"
           icon="pi pi-plus"
           label="启动 Worker"
           @click="showStartDialog = true"
@@ -20,7 +21,8 @@
 
     <!-- 基本信息 -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-      <StatsCard title="Worker 数量" :value="node.worker_count" icon="pi pi-cog" severity="info" />
+      <StatsCard v-if="node.node_type !== 'external_service'" title="Worker 数量" :value="node.worker_count" icon="pi pi-cog" severity="info" />
+      <StatsCard v-else title="服务类型" value="CxCalc" icon="pi pi-box" severity="warn" />
       <StatsCard title="Node ID" :value="node.node_id.slice(0, 16)" icon="pi pi-id-card" />
       <StatsCard title="IP 地址" :value="node.ip_address || '-'" icon="pi pi-globe" />
       <StatsCard title="操作系统" :value="node.os_info || '-'" icon="pi pi-desktop" />
@@ -32,8 +34,19 @@
       <Tag v-for="cap in node.capabilities" :key="cap" :value="cap" severity="info" class="mr-1" />
     </div>
 
-    <!-- Worker 列表 -->
-    <Panel header="活跃 Workers" class="mb-4">
+    <!-- 外部服务健康详情 -->
+    <Panel v-if="node.node_type === 'external_service' && node.health_detail" header="健康详情" class="mb-4">
+      <div class="grid grid-cols-2 gap-4">
+        <div v-for="(value, key) in node.health_detail" :key="key" class="flex flex-col gap-1">
+          <span class="text-sm text-color-secondary">{{ key }}</span>
+          <span class="font-semibold">{{ typeof value === 'object' ? JSON.stringify(value) : String(value) }}</span>
+        </div>
+      </div>
+      <div v-if="Object.keys(node.health_detail).length === 0" class="text-color-secondary">暂无健康详情</div>
+    </Panel>
+
+    <!-- Worker 列表（仅计算节点显示） -->
+    <Panel v-if="node.node_type !== 'external_service'" header="活跃 Workers" class="mb-4">
       <DataTable :value="node.workers" stripedRows dataKey="agent_worker_id" emptyMessage="暂无 Worker">
         <Column field="agent_worker_id" header="Agent Worker ID" style="width: 200px">
           <template #body="{ data }">
@@ -73,8 +86,8 @@
       </DataTable>
     </Panel>
 
-    <!-- 最近命令 -->
-    <Panel header="最近命令">
+    <!-- 最近命令（仅计算节点显示） -->
+    <Panel v-if="node.node_type !== 'external_service'" header="最近命令">
       <DataTable :value="node.recent_commands" stripedRows dataKey="request_id" emptyMessage="暂无命令记录">
         <Column field="command" header="命令" style="width: 140px" />
         <Column field="status" header="状态" style="width: 100px">
