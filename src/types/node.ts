@@ -9,10 +9,12 @@ export enum NodeStatus {
 
 export enum NodeWorkerStatus {
   STARTING = 'starting',
-  RUNNING = 'running',
+  ONLINE = 'online',
+  BUSY = 'busy',
   DRAINING = 'draining',
   STOPPING = 'stopping',
   STOPPED = 'stopped',
+  OFFLINE = 'offline',
 }
 
 export enum CommandStatus {
@@ -25,15 +27,18 @@ export enum CommandStatus {
 export interface NodeWorker {
   id?: string
   node_id: string
-  agent_worker_id: string
-  platform_worker_id?: string
+  agent_worker_id?: string
   service: string
   deploy_mode: string
   image_tag?: string
   status: NodeWorkerStatus
+  hostname?: string
+  ip_address?: string
+  port?: number
   started_at?: string
   stopped_at?: string
   stop_reason?: string
+  last_heartbeat?: string
 }
 
 export interface NodeCommand {

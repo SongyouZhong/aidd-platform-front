@@ -1,8 +1,11 @@
 export enum WorkerStatus {
+  STARTING = 'starting',
   ONLINE = 'online',
   BUSY = 'busy',
-  OFFLINE = 'offline',
   DRAINING = 'draining',
+  STOPPING = 'stopping',
+  STOPPED = 'stopped',
+  OFFLINE = 'offline',
 }
 
 export interface ResourceUsage {
@@ -17,7 +20,11 @@ export interface ResourceUsage {
 
 export interface Worker {
   id: string
-  hostname: string
+  node_id: string
+  agent_worker_id?: string
+  service: string
+  deploy_mode: string
+  hostname?: string
   ip_address?: string
   port: number
   status: WorkerStatus
@@ -29,7 +36,7 @@ export interface Worker {
   current_tasks: string[]
   labels: Record<string, string>
   utilization: number
-  registered_at?: string
+  started_at?: string
   last_heartbeat?: string
   total_tasks_completed: number
   total_tasks_failed: number

@@ -24,6 +24,9 @@ const statusConfig: Record<string, { label: string; severity: string }> = {
   [WorkerStatus.BUSY]: { label: 'Busy', severity: 'warn' },
   [WorkerStatus.OFFLINE]: { label: 'Offline', severity: 'danger' },
   [WorkerStatus.DRAINING]: { label: 'Draining', severity: 'warn' },
+  [WorkerStatus.STARTING]: { label: 'Starting', severity: 'info' },
+  [WorkerStatus.STOPPING]: { label: 'Stopping', severity: 'warn' },
+  [WorkerStatus.STOPPED]: { label: 'Stopped', severity: 'secondary' },
 }
 
 const config = computed(() => statusConfig[props.status] || { label: props.status, severity: 'secondary' })

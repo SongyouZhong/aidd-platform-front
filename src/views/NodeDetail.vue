@@ -47,15 +47,9 @@
             <Tag :value="data.status" :severity="workerStatusSeverity(data.status)" />
           </template>
         </Column>
-        <Column field="platform_worker_id" header="Platform Worker ID" style="width: 200px">
+        <Column field="hostname" header="主机名" style="width: 160px">
           <template #body="{ data }">
-            <router-link
-              v-if="data.platform_worker_id"
-              :to="{ name: 'worker-detail', params: { id: data.platform_worker_id } }"
-              class="text-primary no-underline font-mono text-sm"
-            >
-              {{ data.platform_worker_id.slice(0, 8) }}...
-            </router-link>
+            <span v-if="data.hostname">{{ data.hostname }}</span>
             <span v-else class="text-color-secondary">-</span>
           </template>
         </Column>
@@ -67,7 +61,7 @@
         <Column header="操作" style="width: 100px">
           <template #body="{ data }">
             <Button
-              v-if="data.status === 'running'"
+              v-if="data.status === 'online' || data.status === 'busy'"
               icon="pi pi-stop"
               severity="danger"
               text
@@ -180,10 +174,12 @@ const { refresh } = usePolling(fetchDetail, 10_000)
 function workerStatusSeverity(status: string) {
   const map: Record<string, string> = {
     starting: 'warn',
-    running: 'success',
+    online: 'success',
+    busy: 'warn',
     draining: 'warn',
     stopping: 'warn',
     stopped: 'secondary',
+    offline: 'danger',
   }
   return (map[status] || 'secondary') as any
 }
