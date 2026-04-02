@@ -31,8 +31,8 @@
               <StatusTag :status="worker.status" />
             </div>
             <div class="info-item">
-              <span class="info-label">注册时间</span>
-              <span>{{ formatTime(worker.registered_at) }}</span>
+              <span class="info-label">启动时间</span>
+              <span>{{ formatTime(worker.started_at) }}</span>
             </div>
             <div class="info-item">
               <span class="info-label">最后心跳</span>

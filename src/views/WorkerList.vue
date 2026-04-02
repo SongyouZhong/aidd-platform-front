@@ -175,10 +175,13 @@ const filters = reactive({
 })
 
 const statusOptions = [
+  { label: 'Starting', value: WorkerStatus.STARTING },
   { label: 'Online', value: WorkerStatus.ONLINE },
   { label: 'Busy', value: WorkerStatus.BUSY },
-  { label: 'Offline', value: WorkerStatus.OFFLINE },
   { label: 'Draining', value: WorkerStatus.DRAINING },
+  { label: 'Stopping', value: WorkerStatus.STOPPING },
+  { label: 'Stopped', value: WorkerStatus.STOPPED },
+  { label: 'Offline', value: WorkerStatus.OFFLINE },
 ]
 
 const serviceFilterOptions = [
