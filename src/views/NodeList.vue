@@ -40,6 +40,12 @@
           </router-link>
         </template>
       </Column>
+      <Column field="node_type" header="类型" sortable style="width: 120px">
+        <template #body="{ data }">
+          <Tag v-if="data.node_type === 'external_service'" value="外部服务" severity="warn" />
+          <Tag v-else value="计算节点" severity="info" />
+        </template>
+      </Column>
       <Column field="node_id" header="Node ID" sortable>
         <template #body="{ data }">
           <span class="text-sm text-color-secondary font-mono">{{ data.node_id }}</span>
@@ -50,7 +56,12 @@
           <StatusTag :status="data.status" />
         </template>
       </Column>
-      <Column field="worker_count" header="Worker" sortable style="width: 80px" />
+      <Column field="worker_count" header="Worker" sortable style="width: 80px">
+        <template #body="{ data }">
+          <span v-if="data.node_type !== 'external_service'">{{ data.worker_count }}</span>
+          <span v-else class="text-color-secondary">-</span>
+        </template>
+      </Column>
       <Column field="capabilities" header="能力" style="width: 200px">
         <template #body="{ data }">
           <Tag v-for="cap in data.capabilities" :key="cap" :value="cap" severity="info" class="mr-1" />

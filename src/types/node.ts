@@ -7,6 +7,8 @@ export enum NodeStatus {
   OFFLINE = 'offline',
 }
 
+export type NodeType = 'compute' | 'external_service'
+
 export enum NodeWorkerStatus {
   STARTING = 'starting',
   ONLINE = 'online',
@@ -62,10 +64,12 @@ export interface NodeResponse {
   capabilities: string[]
   os_info?: string
   schrodinger_path?: string
+  node_type: NodeType
   status: NodeStatus
   worker_count: number
   last_heartbeat?: string
   registered_at?: string
+  health_detail?: Record<string, any> | null
 }
 
 export interface NodeDetailResponse extends NodeResponse {
