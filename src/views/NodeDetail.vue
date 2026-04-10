@@ -46,7 +46,7 @@
     </Panel>
 
     <!-- Worker 列表（仅计算节点显示） -->
-    <Panel v-if="node.node_type !== 'external_service'" header="活跃 Workers" class="mb-4">
+    <Panel v-if="node.node_type !== 'external_service'" header="Workers" class="mb-4">
       <DataTable :value="node.workers" stripedRows dataKey="agent_worker_id" emptyMessage="暂无 Worker">
         <Column field="agent_worker_id" header="Agent Worker ID" style="width: 200px">
           <template #body="{ data }">
@@ -69,6 +69,19 @@
         <Column field="started_at" header="启动时间" style="width: 180px">
           <template #body="{ data }">
             {{ data.started_at ? new Date(data.started_at).toLocaleString() : '-' }}
+          </template>
+        </Column>
+        <Column field="stop_reason" header="退出原因" style="width: 120px">
+          <template #body="{ data }">
+            <Button
+              v-if="data.stop_reason"
+              :label="data.stop_reason.includes('\n') ? '查看日志' : data.stop_reason"
+              :severity="data.stop_reason.includes('exit_code') ? 'danger' : 'secondary'"
+              text
+              size="small"
+              @click="showStopReasonDialog(data)"
+            />
+            <span v-else class="text-color-secondary">-</span>
           </template>
         </Column>
         <Column header="操作" style="width: 100px">
@@ -126,6 +139,21 @@
         <Button label="启动" icon="pi pi-play" @click="handleStartWorker" :loading="starting" />
       </template>
     </Dialog>
+
+    <!-- Worker 异常退出日志对话框 -->
+    <Dialog v-model:visible="showLogsDialog" header="Worker 退出日志" modal style="width: 50rem">
+      <div v-if="selectedWorkerLogs" class="flex flex-col gap-3">
+        <div class="flex gap-4">
+          <span class="font-semibold">Worker ID:</span>
+          <span class="font-mono text-sm">{{ selectedWorkerLogs.agent_worker_id }}</span>
+        </div>
+        <div class="flex gap-4">
+          <span class="font-semibold">服务:</span>
+          <span>{{ selectedWorkerLogs.service }}</span>
+        </div>
+        <pre class="log-output">{{ selectedWorkerLogs.stop_reason }}</pre>
+      </div>
+    </Dialog>
   </div>
 
   <div v-else-if="loading" class="flex justify-center p-8">
@@ -163,12 +191,14 @@ const node = ref<NodeDetailResponse | null>(null)
 const loading = ref(true)
 const showStartDialog = ref(false)
 const starting = ref(false)
+const showLogsDialog = ref(false)
+const selectedWorkerLogs = ref<{ agent_worker_id: string; service: string; stop_reason: string } | null>(null)
 
 const startForm = ref({
   service: 'admet',
   deploy_mode: 'docker',
 })
-const serviceOptions = ['admet', 'docking']
+const serviceOptions = ['admet', 'cxcalc', 'docking']
 const deployOptions = ['host', 'docker']
 
 async function fetchDetail() {
@@ -225,4 +255,29 @@ async function handleStopWorker(agentWorkerId: string) {
   await nodesApi.stopWorker(nodeId, agentWorkerId, { graceful: true, timeout: 300 })
   refresh()
 }
+
+function showStopReasonDialog(worker: any) {
+  selectedWorkerLogs.value = {
+    agent_worker_id: worker.agent_worker_id,
+    service: worker.service,
+    stop_reason: worker.stop_reason,
+  }
+  showLogsDialog.value = true
+}
 </script>
+
+<style scoped>
+.log-output {
+  background: var(--p-surface-900);
+  color: var(--p-green-400);
+  padding: 1rem;
+  border-radius: var(--p-content-border-radius);
+  font-family: monospace;
+  font-size: 0.85rem;
+  white-space: pre-wrap;
+  word-break: break-all;
+  max-height: 400px;
+  overflow-y: auto;
+  margin: 0;
+}
+</style>

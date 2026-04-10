@@ -246,6 +246,7 @@ const statusOptions = [
 
 const serviceOptions = [
   { label: 'ADMET', value: 'admet' },
+  { label: 'CxCalc', value: 'cxcalc' },
   { label: 'Docking', value: 'docking' },
   { label: 'MD', value: 'md' },
   { label: 'QSAR', value: 'qsar' },

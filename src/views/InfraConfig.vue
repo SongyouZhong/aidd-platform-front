@@ -43,6 +43,16 @@
           <span class="font-mono text-sm">{{ data.agent_image }}</span>
         </template>
       </Column>
+      <Column header="Docking 扫描" style="width: 140px">
+        <template #body="{ data }">
+          <span class="text-sm">{{ data.docking_sync_interval }}s / 批{{ data.docking_sync_batch_size }}</span>
+        </template>
+      </Column>
+      <Column header="Schrödinger" style="width: 200px">
+        <template #body="{ data }">
+          <span class="font-mono text-sm">{{ data.schrodinger_path || '-' }}</span>
+        </template>
+      </Column>
       <Column field="updated_at" header="更新时间" style="width: 160px">
         <template #body="{ data }">
           {{ data.updated_at ? new Date(data.updated_at).toLocaleString() : '-' }}
@@ -249,6 +259,27 @@
             </div>
           </Panel>
 
+          <!-- Docking 配置 -->
+          <Panel header="Docking 配置" class="lg:col-span-2">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              <div class="flex flex-col gap-1">
+                <label class="font-semibold text-sm">扫描间隔（秒）</label>
+                <InputNumber v-model="form.docking_sync_interval" :useGrouping="false" :min="10" />
+                <small class="text-surface-500">建议 60 ~ 3600，修改后下一轮生效</small>
+              </div>
+              <div class="flex flex-col gap-1">
+                <label class="font-semibold text-sm">每批化合物数</label>
+                <InputNumber v-model="form.docking_sync_batch_size" :useGrouping="false" :min="1" :max="200" />
+                <small class="text-surface-500">Glide 计算较慢，建议 5 ~ 50</small>
+              </div>
+              <div class="flex flex-col gap-1">
+                <label class="font-semibold text-sm">Schrödinger 路径</label>
+                <InputText v-model="form.schrodinger_path" placeholder="/opt/schrodinger" />
+                <small class="text-surface-500">推送到节点后对新 Worker 生效</small>
+              </div>
+            </div>
+          </Panel>
+
         </div>
       </div>
 
@@ -318,6 +349,9 @@ const form = reactive({
   platform_url: '',
   heartbeat_interval: 30,
   agent_image: 'aidd-node-agent:latest',
+  docking_sync_interval: 3600,
+  docking_sync_batch_size: 10,
+  schrodinger_path: '/opt/schrodinger',
 })
 
 const testResultRows = computed(() => {
@@ -398,6 +432,9 @@ function openCreateDialog() {
     platform_url: '',
     heartbeat_interval: 30,
     agent_image: 'aidd-node-agent:latest',
+    docking_sync_interval: 3600,
+    docking_sync_batch_size: 10,
+    schrodinger_path: '/opt/schrodinger',
   })
   dialogVisible.value = true
 }
@@ -426,6 +463,9 @@ function openEditDialog(c: InfraConfig) {
     platform_url: c.platform_url || '',
     heartbeat_interval: c.heartbeat_interval,
     agent_image: c.agent_image,
+    docking_sync_interval: c.docking_sync_interval,
+    docking_sync_batch_size: c.docking_sync_batch_size,
+    schrodinger_path: c.schrodinger_path || '/opt/schrodinger',
   })
   dialogVisible.value = true
 }
@@ -461,6 +501,9 @@ async function handleSave() {
       if (form.platform_url !== (orig.platform_url || '')) payload.platform_url = form.platform_url
       if (form.heartbeat_interval !== orig.heartbeat_interval) payload.heartbeat_interval = form.heartbeat_interval
       if (form.agent_image !== orig.agent_image) payload.agent_image = form.agent_image
+      if (form.docking_sync_interval !== orig.docking_sync_interval) payload.docking_sync_interval = form.docking_sync_interval
+      if (form.docking_sync_batch_size !== orig.docking_sync_batch_size) payload.docking_sync_batch_size = form.docking_sync_batch_size
+      if (form.schrodinger_path !== (orig.schrodinger_path || '/opt/schrodinger')) payload.schrodinger_path = form.schrodinger_path
 
       if (Object.keys(payload).length === 0) {
         actionResult.value = { severity: 'info', message: '没有修改' }

@@ -69,7 +69,7 @@
       <Card class="section-card">
         <template #title>任务队列统计</template>
         <template #content>
-          <div v-if="taskStats" class="chart-container">
+          <div v-if="taskStats && chartData" class="chart-container">
             <Chart type="doughnut" :data="chartData" :options="chartOptions" />
             <div class="chart-total">
               总提交: {{ taskStats.total_submitted }}
@@ -100,6 +100,25 @@
         </template>
       </Card>
     </div>
+
+    <!-- Service stats -->
+    <Card class="section-card">
+      <template #title>按服务分类统计</template>
+      <template #content>
+        <div v-if="serviceStatsEntries.length" class="service-stats-grid">
+          <div v-for="[svc, stats] in serviceStatsEntries" :key="svc" class="service-stats-card">
+            <div class="service-name">{{ svc }}</div>
+            <div class="service-metrics">
+              <span class="metric pending">待处理 {{ stats.pending }}</span>
+              <span class="metric running">运行中 {{ stats.running }}</span>
+              <span class="metric completed">已完成 {{ stats.completed }}</span>
+              <span class="metric failed">失败 {{ stats.failed }}</span>
+            </div>
+          </div>
+        </div>
+        <div v-else class="text-muted">暂无服务统计</div>
+      </template>
+    </Card>
   </div>
 </template>
 
@@ -114,7 +133,8 @@ import ResourceBar from '@/components/ResourceBar.vue'
 import StatusTag from '@/components/StatusTag.vue'
 import { usePolling } from '@/composables/usePolling'
 import { getDetailedHealth } from '@/api/health'
-import { getTaskStats } from '@/api/tasks'
+import { getTaskStats, getTaskStatsByService } from '@/api/tasks'
+import type { ServiceStats } from '@/api/tasks'
 import { getWorkers } from '@/api/workers'
 import { getWorkerStats } from '@/api/workers'
 import type { DetailedHealthResponse } from '@/types/health'
@@ -127,21 +147,25 @@ const healthData = ref<DetailedHealthResponse | null>(null)
 const taskStats = ref<QueueStatsResponse | null>(null)
 const clusterStats = ref<ClusterStatsResponse | null>(null)
 const workers = ref<Worker[]>([])
+const serviceStats = ref<Record<string, ServiceStats>>({})
 
+const serviceStatsEntries = computed(() => Object.entries(serviceStats.value))
 const healthPoll = usePolling(async () => {
   const { data } = await getDetailedHealth()
   healthData.value = data
 }, 10000)
 
 const statsPoll = usePolling(async () => {
-  const [statsRes, clusterRes, workersRes] = await Promise.all([
+  const [statsRes, clusterRes, workersRes, svcRes] = await Promise.all([
     getTaskStats(),
     getWorkerStats(),
     getWorkers(),
+    getTaskStatsByService(),
   ])
   taskStats.value = statsRes.data
   clusterStats.value = clusterRes.data
   workers.value = workersRes.data.items
+  serviceStats.value = svcRes.data.services
 }, 15000)
 
 function reconnectAll() {
@@ -259,6 +283,42 @@ const chartOptions = {
   text-align: center;
   padding: 2rem;
 }
+
+.service-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.service-stats-card {
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--p-content-border-color);
+  border-radius: var(--p-content-border-radius);
+}
+
+.service-name {
+  font-weight: 600;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+}
+
+.service-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.metric {
+  font-size: 0.8rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+}
+
+.metric.pending { background: #fef3c7; color: #92400e; }
+.metric.running { background: #dbeafe; color: #1e40af; }
+.metric.completed { background: #dcfce7; color: #166534; }
+.metric.failed { background: #fee2e2; color: #991b1b; }
 
 @media (max-width: 768px) {
   .grid-4 { grid-template-columns: repeat(2, 1fr); }

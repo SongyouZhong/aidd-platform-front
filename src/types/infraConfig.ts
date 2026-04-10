@@ -28,6 +28,10 @@ export interface InfraConfig {
   heartbeat_interval: number
   agent_image: string
 
+  docking_sync_interval: number
+  docking_sync_batch_size: number
+  schrodinger_path?: string
+
   updated_at?: string
 }
 
@@ -54,6 +58,10 @@ export interface InfraConfigUpdate {
   platform_url?: string
   heartbeat_interval?: number
   agent_image?: string
+
+  docking_sync_interval?: number
+  docking_sync_batch_size?: number
+  schrodinger_path?: string
 }
 
 export interface InfraConfigCreate {
@@ -76,6 +84,9 @@ export interface InfraConfigCreate {
   platform_url?: string
   heartbeat_interval?: number
   agent_image?: string
+  docking_sync_interval?: number
+  docking_sync_batch_size?: number
+  schrodinger_path?: string
 }
 
 // =============================================================================
