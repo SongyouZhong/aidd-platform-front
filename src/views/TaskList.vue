@@ -294,7 +294,7 @@ async function loadTasks() {
     const params: Record<string, any> = {}
     if (filters.status) params.status = filters.status
     if (filters.service) params.service = filters.service
-    params.limit = 200
+    params.limit = 1000
     const { data } = await getTasks(params)
     let items = data.items
     if (filters.priority !== null && filters.priority !== undefined) {
