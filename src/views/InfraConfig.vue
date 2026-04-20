@@ -48,6 +48,16 @@
           <span class="text-sm">{{ data.docking_sync_interval }}s / 批{{ data.docking_sync_batch_size }}</span>
         </template>
       </Column>
+      <Column header="ADMET 扫描" style="width: 140px">
+        <template #body="{ data }">
+          <span class="text-sm">{{ data.admet_sync_interval }}s / 批{{ data.admet_sync_batch_size }}</span>
+        </template>
+      </Column>
+      <Column header="CxCalc 扫描" style="width: 140px">
+        <template #body="{ data }">
+          <span class="text-sm">{{ data.cxcalc_sync_interval }}s / 批{{ data.cxcalc_sync_batch_size }}</span>
+        </template>
+      </Column>
       <Column header="Schrödinger" style="width: 200px">
         <template #body="{ data }">
           <span class="font-mono text-sm">{{ data.schrodinger_path || '-' }}</span>
@@ -280,6 +290,38 @@
             </div>
           </Panel>
 
+          <!-- ADMET 配置 -->
+          <Panel header="ADMET 配置">
+            <div class="flex flex-col gap-3">
+              <div class="flex flex-col gap-1">
+                <label class="font-semibold text-sm">扫描间隔（秒）</label>
+                <InputNumber v-model="form.admet_sync_interval" :useGrouping="false" :min="10" />
+                <small class="text-surface-500">建议 60 ~ 3600，修改后下一轮生效</small>
+              </div>
+              <div class="flex flex-col gap-1">
+                <label class="font-semibold text-sm">每批化合物数</label>
+                <InputNumber v-model="form.admet_sync_batch_size" :useGrouping="false" :min="1" :max="500" />
+                <small class="text-surface-500">QikProp 计算较快，建议 50 ~ 200</small>
+              </div>
+            </div>
+          </Panel>
+
+          <!-- CxCalc 配置 -->
+          <Panel header="CxCalc 配置">
+            <div class="flex flex-col gap-3">
+              <div class="flex flex-col gap-1">
+                <label class="font-semibold text-sm">扫描间隔（秒）</label>
+                <InputNumber v-model="form.cxcalc_sync_interval" :useGrouping="false" :min="10" />
+                <small class="text-surface-500">建议 60 ~ 3600，修改后下一轮生效</small>
+              </div>
+              <div class="flex flex-col gap-1">
+                <label class="font-semibold text-sm">每批化合物数</label>
+                <InputNumber v-model="form.cxcalc_sync_batch_size" :useGrouping="false" :min="1" :max="500" />
+                <small class="text-surface-500">ChemAxon 计算较快，建议 50 ~ 200</small>
+              </div>
+            </div>
+          </Panel>
+
         </div>
       </div>
 
@@ -352,6 +394,10 @@ const form = reactive({
   docking_sync_interval: 3600,
   docking_sync_batch_size: 10,
   schrodinger_path: '/opt/schrodinger',
+  admet_sync_interval: 3600,
+  admet_sync_batch_size: 50,
+  cxcalc_sync_interval: 60,
+  cxcalc_sync_batch_size: 50,
 })
 
 const testResultRows = computed(() => {
@@ -435,6 +481,10 @@ function openCreateDialog() {
     docking_sync_interval: 3600,
     docking_sync_batch_size: 10,
     schrodinger_path: '/opt/schrodinger',
+    admet_sync_interval: 3600,
+    admet_sync_batch_size: 50,
+    cxcalc_sync_interval: 60,
+    cxcalc_sync_batch_size: 50,
   })
   dialogVisible.value = true
 }
@@ -466,6 +516,10 @@ function openEditDialog(c: InfraConfig) {
     docking_sync_interval: c.docking_sync_interval,
     docking_sync_batch_size: c.docking_sync_batch_size,
     schrodinger_path: c.schrodinger_path || '/opt/schrodinger',
+    admet_sync_interval: c.admet_sync_interval,
+    admet_sync_batch_size: c.admet_sync_batch_size,
+    cxcalc_sync_interval: c.cxcalc_sync_interval,
+    cxcalc_sync_batch_size: c.cxcalc_sync_batch_size,
   })
   dialogVisible.value = true
 }
@@ -504,6 +558,10 @@ async function handleSave() {
       if (form.docking_sync_interval !== orig.docking_sync_interval) payload.docking_sync_interval = form.docking_sync_interval
       if (form.docking_sync_batch_size !== orig.docking_sync_batch_size) payload.docking_sync_batch_size = form.docking_sync_batch_size
       if (form.schrodinger_path !== (orig.schrodinger_path || '/opt/schrodinger')) payload.schrodinger_path = form.schrodinger_path
+      if (form.admet_sync_interval !== orig.admet_sync_interval) payload.admet_sync_interval = form.admet_sync_interval
+      if (form.admet_sync_batch_size !== orig.admet_sync_batch_size) payload.admet_sync_batch_size = form.admet_sync_batch_size
+      if (form.cxcalc_sync_interval !== orig.cxcalc_sync_interval) payload.cxcalc_sync_interval = form.cxcalc_sync_interval
+      if (form.cxcalc_sync_batch_size !== orig.cxcalc_sync_batch_size) payload.cxcalc_sync_batch_size = form.cxcalc_sync_batch_size
 
       if (Object.keys(payload).length === 0) {
         actionResult.value = { severity: 'info', message: '没有修改' }

@@ -32,6 +32,11 @@ export interface InfraConfig {
   docking_sync_batch_size: number
   schrodinger_path?: string
 
+  admet_sync_interval: number
+  admet_sync_batch_size: number
+  cxcalc_sync_interval: number
+  cxcalc_sync_batch_size: number
+
   updated_at?: string
 }
 
@@ -62,6 +67,10 @@ export interface InfraConfigUpdate {
   docking_sync_interval?: number
   docking_sync_batch_size?: number
   schrodinger_path?: string
+  admet_sync_interval?: number
+  admet_sync_batch_size?: number
+  cxcalc_sync_interval?: number
+  cxcalc_sync_batch_size?: number
 }
 
 export interface InfraConfigCreate {
@@ -87,6 +96,10 @@ export interface InfraConfigCreate {
   docking_sync_interval?: number
   docking_sync_batch_size?: number
   schrodinger_path?: string
+  admet_sync_interval?: number
+  admet_sync_batch_size?: number
+  cxcalc_sync_interval?: number
+  cxcalc_sync_batch_size?: number
 }
 
 // =============================================================================
