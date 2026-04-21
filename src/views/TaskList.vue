@@ -235,6 +235,7 @@ const filters = reactive({
 
 // Options
 const statusOptions = [
+  { label: '全部状态', value: null },
   { label: 'Pending', value: TaskStatus.PENDING },
   { label: 'Queued', value: TaskStatus.QUEUED },
   { label: 'Running', value: TaskStatus.RUNNING },
@@ -245,6 +246,7 @@ const statusOptions = [
 ]
 
 const serviceOptions = [
+  { label: '全部服务', value: null },
   { label: 'ADMET', value: 'admet' },
   { label: 'CxCalc', value: 'cxcalc' },
   { label: 'Docking', value: 'docking' },
@@ -253,6 +255,7 @@ const serviceOptions = [
 ]
 
 const priorityOptions = [
+  { label: '全部优先级', value: null },
   { label: 'Critical', value: TaskPriority.CRITICAL },
   { label: 'High', value: TaskPriority.HIGH },
   { label: 'Normal', value: TaskPriority.NORMAL },
@@ -294,13 +297,10 @@ async function loadTasks() {
     const params: Record<string, any> = {}
     if (filters.status) params.status = filters.status
     if (filters.service) params.service = filters.service
-    params.limit = 1000
+    if (filters.priority !== null && filters.priority !== undefined) params.priority = filters.priority
+    params.limit = 500
     const { data } = await getTasks(params)
-    let items = data.items
-    if (filters.priority !== null && filters.priority !== undefined) {
-      items = items.filter((t) => t.priority === filters.priority)
-    }
-    tasks.value = items
+    tasks.value = data.items
   } finally {
     loading.value = false
   }
